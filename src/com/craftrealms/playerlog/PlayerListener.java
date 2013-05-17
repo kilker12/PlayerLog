@@ -23,7 +23,7 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void PlayerChat(AsyncPlayerChatEvent e) {
 		try {
-			this.plugin.sqlinsert("INSERT INTO  `playerlog`.`chat` (`id` ,`player` ,`date` ,`message` ,`server`) VALUES (NULL ,  '" + e.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  '" + e.getMessage() + "', '" + this.plugin.server + "')");
+			this.plugin.sqlinsert("INSERT INTO  `playerlog`.`chat` (`id` ,`player` ,`date` ,`message` ,`server`) VALUES (NULL ,  '" + e.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  '" + e.getMessage().replace("'", "") + "', '" + this.plugin.server + "')");
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -33,7 +33,7 @@ public class PlayerListener implements Listener {
 	public void PlayerCommand(PlayerCommandPreprocessEvent c) {
 		if("/login" != c.getMessage().substring(0, Math.min(c.getMessage().length(), 5))) {
 			try {
-				this.plugin.sqlinsert("INSERT INTO  `playerlog`.`command` (`id` ,`player` ,`date` ,`command` ,`server`) VALUES (NULL ,  '" + c.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  '" + c.getMessage() + "', '" + this.plugin.server + "')");
+				this.plugin.sqlinsert("INSERT INTO  `playerlog`.`command` (`id` ,`player` ,`date` ,`command` ,`server`) VALUES (NULL ,  '" + c.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  '" + c.getMessage().replace("'", "") + "', '" + this.plugin.server + "')");
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
