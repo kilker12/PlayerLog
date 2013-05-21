@@ -31,12 +31,21 @@ public class PlayerListener implements Listener {
 	
 	@EventHandler
 	public void PlayerCommand(PlayerCommandPreprocessEvent c) {
-		if("/login" != c.getMessage().substring(0, Math.min(c.getMessage().length(), 5))) {
-			try {
-				this.plugin.sqlinsert("INSERT INTO  `playerlog`.`command` (`id` ,`player` ,`date` ,`command` ,`server`) VALUES (NULL ,  '" + c.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  '" + c.getMessage().replace("'", "") + "', '" + this.plugin.server + "')");
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
+        String[] cmd = c.getMessage().substring(1).split(" ");
+		if(!cmd[0].equalsIgnoreCase("login")) {
+            if(cmd[0].equalsIgnoreCase("g")) {
+                c.setMessage(c.getMessage() + "GLOB");
+            } else if(cmd[0].equalsIgnoreCase("h")) {
+                c.setMessage(c.getMessage() + "HELP");
+            } else if(cmd[0].equalsIgnoreCase("t")) {
+                c.setMessage(c.getMessage() + "TRAD");
+            } else {
+			    try {
+				    this.plugin.sqlinsert("INSERT INTO  `playerlog`.`command` (`id` ,`player` ,`date` ,`command` ,`server`) VALUES (NULL ,  '" + c.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  '" + c.getMessage().replace("'", "") + "', '" + this.plugin.server + "')");
+			    } catch (SQLException e1) {
+				    e1.printStackTrace();
+			    }
+            }
 		}
 	}
 	
