@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="AuthMe">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../Craftrealms/libs/AuthMe.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

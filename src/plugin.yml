@@ -1,3 +1,9 @@
 name: PlayerLog
 main: com.craftrealms.playerlog.PlayerLog
 version: 1.0
+commands:
+  test:
+    description: Test
+    usage: /test
+    permission: playerlog.test
+    permission-message: No perms

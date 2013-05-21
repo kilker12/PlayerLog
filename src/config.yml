@@ -1,3 +1,4 @@
+usesql: false
 mysql:
   host: "localhost"
   user: "root"
@@ -5,3 +6,5 @@ mysql:
   db: "playerlog"
   
 server: "server1"
+socketport: 9999
+maxsocketconnections: 0

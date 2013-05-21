@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="PlayerLog:jar">
+    <output-path>$PROJECT_DIR$/../../Craftrealms/Test Server/plugins</output-path>
+    <root id="archive" name="PlayerLog.jar">
+      <element id="module-output" name="PlayerLog" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/config.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/plugin.yml" />
+    </root>
+  </artifact>
+</component>
