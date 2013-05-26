@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 
@@ -17,25 +16,41 @@ public class PlayerListener implements Listener {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		this.plugin = plugin;
 	}
-	
 	@EventHandler
 	public void PlayerChat(AsyncPlayerChatEvent e) {
-        String chan = e.getMessage().substring(e.getMessage().length() - 4);
+        String chan;
+        String message;
+        if(e.getMessage().length() > 4) {
+            chan = e.getMessage().substring(e.getMessage().length() - 4);
+            message = e.getMessage().substring(0, e.getMessage().length() -4);
+        } else {
+            chan = "LOCL";
+            message = e.getMessage();
+        }
 		if(chan.equalsIgnoreCase("GLOB")) {
+            e.setMessage(message);
             try {
-                this.plugin.sqlinsert("INSERT INTO  `playerlog`.`chat` (`id` ,`player` ,`date` ,`message` ,`server`) VALUES (NULL ,  '" + e.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  'GLOBAL: " + e.getMessage().replace("'", "") + "', '" + this.plugin.servername + "')");
+                this.plugin.sqlinsert("INSERT INTO  `playerlog`.`chat` (`id` ,`player` ,`date` ,`message` ,`server`) VALUES (NULL ,  '" + e.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  'GLOBAL: " + message.replace("'", "") + "', '" + this.plugin.servername + "')");
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
         } else if(chan.equalsIgnoreCase("HELP")) {
+            e.setMessage(message);
             try {
-                this.plugin.sqlinsert("INSERT INTO  `playerlog`.`chat` (`id` ,`player` ,`date` ,`message` ,`server`) VALUES (NULL ,  '" + e.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  'HELP: " + e.getMessage().replace("'", "") + "', '" + this.plugin.servername + "')");
+                this.plugin.sqlinsert("INSERT INTO  `playerlog`.`chat` (`id` ,`player` ,`date` ,`message` ,`server`) VALUES (NULL ,  '" + e.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  'HELP: " + message.replace("'", "") + "', '" + this.plugin.servername + "')");
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
         } else if(chan.equalsIgnoreCase("TRAD")) {
+            e.setMessage(message);
             try {
-                this.plugin.sqlinsert("INSERT INTO  `playerlog`.`chat` (`id` ,`player` ,`date` ,`message` ,`server`) VALUES (NULL ,  '" + e.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  'TRADE: " + e.getMessage().replace("'", "") + "', '" + this.plugin.servername + "')");
+                this.plugin.sqlinsert("INSERT INTO  `playerlog`.`chat` (`id` ,`player` ,`date` ,`message` ,`server`) VALUES (NULL ,  '" + e.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  'TRADE: " + message.replace("'", "") + "', '" + this.plugin.servername + "')");
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        } else {
+            try {
+                this.plugin.sqlinsert("INSERT INTO  `playerlog`.`chat` (`id` ,`player` ,`date` ,`message` ,`server`) VALUES (NULL ,  '" + e.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  'LOCAL: " + e.getMessage().replace("'", "") + "', '" + this.plugin.servername + "')");
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
@@ -50,7 +65,7 @@ public class PlayerListener implements Listener {
                 c.setMessage(c.getMessage() + "GLOB");
             } else if(cmd[0].equalsIgnoreCase("h")) {
                 c.setMessage(c.getMessage() + "HELP");
-            } else if(cmd[0].equalsIgnoreCase("t")) {
+            } else if(cmd[0].equalsIgnoreCase("trade")) {
                 c.setMessage(c.getMessage() + "TRAD");
             } else {
 			    try {
@@ -83,7 +98,7 @@ public class PlayerListener implements Listener {
 		Integer tox = t.getTo().getBlockX();
 		Integer toy = t.getTo().getBlockY();
 		Integer toz = t.getTo().getBlockZ();
-		if(tox != fromx && tox != fromx + 5 && tox != fromx - 5) {
+		if(!tox.equals(fromx) && !tox.equals(fromx + 5) && !tox.equals(fromx - 5)) {
 			try {
 				this.plugin.sqlinsert("INSERT INTO  `playerlog`.`teleport` (`id` ,`player` ,`date` ,`fromx` ,`fromy` ,`fromz` ,`tox` ,`toy` ,`toz` ,`server`) VALUES (NULL ,  '" + t.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  '" + Integer.toString(fromx) + "', '" + Integer.toString(fromy) + "', '" + Integer.toString(fromz) + "', '" + Integer.toString(tox) + "', '" + Integer.toString(toy) + "', '" + Integer.toString(toz) + "', '" + this.plugin.servername + "')");
 			} catch (SQLException e) {
@@ -100,6 +115,15 @@ public class PlayerListener implements Listener {
 			e1.printStackTrace();
 		}
 	}
+
+    @EventHandler
+    public void PlayerQuit(PlayerQuitEvent event) {
+        try {
+            this.plugin.sqlinsert("INSERT INTO  `playerlog`.`loginlogout` (`id` ,`player` ,`date` ,`log` ,`server`) VALUES (NULL ,  '" + event.getPlayer().getName().toLowerCase() + "', CURRENT_TIMESTAMP ,  'logout', '" + this.plugin.servername + "')");
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+    }
 	
 	@EventHandler
 	public void PlayerDeath(PlayerDeathEvent d) {
@@ -115,7 +139,9 @@ public class PlayerListener implements Listener {
     public void PlayerRightClick(PlayerInteractEntityEvent event) {
         if(event.getRightClicked() instanceof Player) {
             if(event.getPlayer().hasPermission("playerlog.client")) {
-                plugin.server.playersockets.get(event.getPlayer().getName()).sendMessage("show:" + ((Player) event.getRightClicked()).getPlayer().getName().toLowerCase() + ":" + plugin.servername);
+                Player clicked = ((Player) event.getRightClicked()).getPlayer();
+                Player clicker = event.getPlayer();
+                plugin.server.playersockets.get(clicker.getName().toLowerCase()).sendMessage("show:" + clicked.getName().toLowerCase() + ":" + plugin.servername);
             }
         }
     }

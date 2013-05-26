@@ -7,7 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="bukkit-1.5.2-R0.1" level="project" />
+    <orderEntry type="library" name="bukkit-1.5.2-R0.1-20130430.183414-1" level="project" />
     <orderEntry type="library" name="AuthMe" level="project" />
   </component>
 </module>

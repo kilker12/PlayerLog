@@ -2,8 +2,6 @@ package com.craftrealms.playerlog;
 
 import java.io.*;
 import java.net.*;
-import java.security.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -20,6 +18,8 @@ public class SocketServer implements Runnable {
     private PlayerLog p;
     private int maxConnections;
     private int port;
+    private ServerSocket listener = null;
+    public int clients;
     public HashMap<String, SocketHandler> playersockets = new HashMap<String, SocketHandler>();
 
     public SocketServer(PlayerLog plugin, int po, int maxConnection) {
@@ -30,13 +30,11 @@ public class SocketServer implements Runnable {
 
     @Override
     public void run() {
-        int i=0;
-        try{
-            ServerSocket listener = new ServerSocket(port);
+        clients=0;
+        try {
+            listener = new ServerSocket(port);
             Socket server;
-            while((i++ < maxConnections) || (maxConnections == 0)){
-                SocketHandler connection;
-
+            while((clients++ < maxConnections) || (maxConnections == 0)){
                 server = listener.accept();
                 SocketHandler conn_c= new SocketHandler(server, p, this);
                 Thread t = new Thread(conn_c);
@@ -45,6 +43,12 @@ public class SocketServer implements Runnable {
         } catch (IOException ioe) {
             p.warning("IOException on socket listen: " + ioe);
             ioe.printStackTrace();
+        } finally {
+            try {
+                listener.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

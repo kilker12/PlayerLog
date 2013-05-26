@@ -1,17 +1,18 @@
 package com.craftrealms.playerlog;
 
+import com.google.gson.Gson;
 import uk.org.whoami.authme.cache.auth.PlayerAuth;
 import uk.org.whoami.authme.security.PasswordSecurity;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class SocketHandler implements Runnable {
     private Socket server;
-    private String line,input;
+    String line,input;
     private PlayerLog p;
     private SocketServer s;
     private PrintStream out;
@@ -29,8 +30,7 @@ public class SocketHandler implements Runnable {
         input="";
 
         try {
-            // Get input from the client
-            DataInputStream in = new DataInputStream (server.getInputStream());
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
             out = new PrintStream(server.getOutputStream());
 
             while((line = in.readLine()) != null && !line.equals(".")) {
@@ -52,7 +52,9 @@ public class SocketHandler implements Runnable {
                         e.printStackTrace();
                     }
                 } else if(req[0].equalsIgnoreCase("getcommands") && isAuthed) {
-                    out.println("commands");
+                    Gson json = new Gson();
+                    ResultSet rs = p.sqlfetch("SELECT date, command FROM command WHERE player = '" + req[1] + "' AND server = '" + p.servername + "' ORDER BY  date ASC ");
+                    out.println(json.toJson(rs));
                 }
                 else if(line.equalsIgnoreCase("close")) {
                     break;
@@ -62,11 +64,6 @@ public class SocketHandler implements Runnable {
                     out.println("no login");
                 }
             }
-
-            // Now write to the client
-
-            p.log("Overall message is:" + input);
-            out.println("Overall message is:" + input);
 
             s.playersockets.remove(username);
             server.close();

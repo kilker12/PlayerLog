@@ -1,9 +1,11 @@
 package com.craftrealms.playerlog;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.google.gson.Gson;
 import net.db.MySQL;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,13 +14,13 @@ import uk.org.whoami.authme.AuthMe;
 import static uk.org.whoami.authme.api.API.hookAuthMe;
 
 public class PlayerLog extends JavaPlugin {
-	private String sqlhost;
-	private String sqluser;
-	private String sqlpass;
-	private String sqldb;
-	public String servername;
-    private int socketport;
-    private int maxsocketconn;
+	String sqlhost;
+	String sqluser;
+	String sqlpass;
+	String sqldb;
+	String servername;
+    int socketport;
+    int maxsocketconn;
     public AuthMe auth;
 	MySQL MySQL;
 	Connection c = null;
@@ -55,6 +57,8 @@ public class PlayerLog extends JavaPlugin {
                 c.close();
             } catch (SQLException e) {
                 log("MySQL was never up so we cant close it");
+            } catch (NullPointerException e) {
+                log("MySQL was not opened properly. Probably the database wasnt responding during server startup");
             }
         }
         this.log("PlayerLog has been disabled!");
@@ -72,4 +76,15 @@ public class PlayerLog extends JavaPlugin {
 		Statement statement = c.createStatement();
 		statement.execute(query);
 	}
+    public ResultSet sqlfetch(String query) {
+        ResultSet rs = null;
+        try {
+            Statement statement = c.createStatement();
+            statement.execute(query);
+            rs = statement.executeQuery(query);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rs;
+    }
 }
